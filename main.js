@@ -1,6 +1,6 @@
 import { Engine, Render, World, Bodies, Body, Runner, Composite, Common, Vertices } from "matter-js";
-// import decomp from 'poly-decomp';
-// Common.setDecomp(decomp);
+import decomp from 'poly-decomp';
+Common.setDecomp(decomp);
 
 const gameWidth = 800;
 const gameHeight = 700;
@@ -85,46 +85,6 @@ function createBodyFromPNG(imageUrl, scale) {
     img.onerror = reject;
     img.src = imageUrl;
   });
-}
-
-
-function simplifyContour(points, tolerance) {
-  if (points.length <= 2) return points;
-
-  let maxDistance = 0;
-  let index = 0;
-  const end = points.length - 1;
-
-  for (let i = 1; i < end; i++) {
-    const distance = pointLineDistance(points[i], points[0], points[end]);
-    if (distance > maxDistance) {
-      maxDistance = distance;
-      index = i;
-    }
-  }
-
-  if (maxDistance > tolerance) {
-    const results1 = simplifyContour(points.slice(0, index + 1), tolerance);
-    const results2 = simplifyContour(points.slice(index), tolerance);
-
-    return [...results1.slice(0, -1), ...results2];
-  } else {
-    return [points[0], points[end]];
-  }
-}
-
-function pointLineDistance(point, lineStart, lineEnd) {
-  const numerator = Math.abs(
-    (lineEnd.y - lineStart.y) * point.x -
-    (lineEnd.x - lineStart.x) * point.y +
-    lineEnd.x * lineStart.y -
-    lineEnd.y * lineStart.x
-  );
-  const denominator = Math.sqrt(
-    Math.pow(lineEnd.y - lineStart.y, 2) +
-    Math.pow(lineEnd.x - lineStart.x, 2)
-  );
-  return numerator / denominator;
 }
 
 // 키보드 이벤트 리스너 수정
