@@ -1,6 +1,4 @@
 import { Engine, Render, World, Bodies, Body, Runner, Composite, Common, Vertices } from "matter-js";
-import decomp from 'poly-decomp';
-Common.setDecomp(decomp);
 
 const gameWidth = 800;
 const gameHeight = 700;
@@ -31,57 +29,66 @@ const ground = Bodies.rectangle(gameWidth / 2, gameHeight - 100, gameWidth / 2, 
 });
 World.add(world, ground);
 
-const animals = [
-  { name: 'giraffe', path: 'assets/giraffe.png' },
-  { name: 'girl', path: 'assets/girl.png' },
-];
-
-let currentAnimal = 0;
 let currentAnimalBody = null;
 let isGameOver = false;
 
-function createBodyFromPNG(imageUrl, scale) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0, img.width, img.height);
+async function loadPathsFromJson(jsonFile) {
+  const response = await fetch(jsonFile);
+  const data = await response.json();
+  return data.paths;
+}
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const points = [];
-
-      for (let y = 0; y < canvas.height; y+=10) {
-        for (let x = 0; x < canvas.width; x+=10) {
-          const alpha = imageData.data[(y * canvas.width + x) * 4 + 3];
-          if (alpha > 0) {
-            points.push({ x: x * scale, y: y * scale });
-          }
-        }
-      }
-
-      const sortedPoints = Vertices.clockwiseSort(points);
-      const body = Bodies.fromVertices(0, 0, [sortedPoints], {
-        render: {
-          sprite: {
-            texture: imageUrl,
-            xScale: scale,
-            yScale: scale
-          }
-        },
-        isSleeping: true,
-        friction: 1,        // 마찰력 증가
-        frictionStatic: 10,  // 정지 마찰력 증가
-        restitution: 0.1      // 반발력 감소
-      });
-
-      resolve(body);
-    };
-    img.onerror = reject;
-    img.src = imageUrl;
+async function createBodyFromJsonPath(jsonFile, scale, imagePath) {
+  const paths = await loadPathsFromJson(jsonFile);
+  const vertexSets = paths.map(path => {
+    return Vertices.scale(path, scale, scale);
   });
+
+  const body = Bodies.fromVertices(0, 0, vertexSets, {
+    render: {
+      sprite: {
+        texture: imagePath,
+        xScale: scale,
+        yScale: scale
+      }
+    },
+    isSleeping: true,
+    friction: 1,
+    frictionStatic: 10,
+    restitution: 0.1
+  }, true);
+
+  return body;
+}
+
+const animals = [
+  { name: 'giraffe', jsonPath: 'assets/giraffe.json', imagePath: 'assets/giraffe.png' },
+  // { name: 'girl', jsonPath: 'assets/girl.json', imagePath: 'assets/girl.png' },
+];
+
+function createAndPositionAnimal() {
+  const randomIndex = Math.floor(Math.random() * animals.length);
+  const animal = animals[randomIndex];
+  createBodyFromJsonPath(animal.jsonPath, 0.15, animal.imagePath).then(animalBody => {
+    Body.setPosition(animalBody, { x: gameWidth / 2, y: 100 });
+    World.add(world, animalBody);
+    currentAnimalBody = animalBody;
+  });
+}
+
+function dropAnimal() {
+  currentAnimalBody.isSleeping = false;
+  
+  // 동물이 멈출 때까지 기다린 후 새 동물 생성
+  const checkStopped = () => {
+    if (currentAnimalBody.speed < 0.1) {
+      createAndPositionAnimal();
+    } else {
+      setTimeout(checkStopped, 100);
+    }
+  };
+  
+  setTimeout(checkStopped, 1000); // 1초 후부터 체크 시작
 }
 
 // 키보드 이벤트 리스너 수정
@@ -104,31 +111,6 @@ document.addEventListener('keydown', (event) => {
       break;
   }
 });
-
-function createAndPositionAnimal() {
-  const randomIndex = Math.floor(Math.random() * animals.length);
-  const animal = animals[randomIndex];
-  createBodyFromPNG(animal.path, 0.15).then(animalBody => {
-    Body.setPosition(animalBody, { x: gameWidth / 2, y: 100 });
-    World.add(world, animalBody);
-    currentAnimalBody = animalBody;
-  })
-}
-
-function dropAnimal() {
-  currentAnimalBody.isSleeping = false;
-  
-  // 동물이 멈출 때까지 기다린 후 새 동물 생성
-  const checkStopped = () => {
-    if (currentAnimalBody.speed < 0.1) {
-      createAndPositionAnimal();
-    } else {
-      setTimeout(checkStopped, 100);
-    }
-  };
-  
-  setTimeout(checkStopped, 1000); // 1초 후부터 체크 시작
-}
 
 function checkGameOver() {
   const bodies = Composite.allBodies(engine.world);
