@@ -62,9 +62,6 @@ function createBodyFromPNG(imageUrl, scale) {
         }
       }
 
-      // const simplifiedPoints = simplifyContour(points, 20);
-      // console.log(simplifiedPoints);
-
       const sortedPoints = Vertices.clockwiseSort(points);
       const body = Bodies.fromVertices(0, 0, [sortedPoints], {
         render: {
