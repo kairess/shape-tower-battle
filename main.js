@@ -19,7 +19,7 @@ const render = Render.create({
   }
 });
 
-const ground = Bodies.rectangle(gameWidth / 2, gameHeight - 100, gameWidth / 2, 30, {
+const ground = Bodies.rectangle(gameWidth / 2, gameHeight - 80, gameWidth / 2, 30, {
   isStatic: true,
   render: {
     fillStyle: 'green',
@@ -41,7 +41,7 @@ function createShape() {
   const shape = shapes[shapeName](0, 0, size);
 
   Body.setStatic(shape, true);
-  Body.setPosition(shape, { x: gameWidth / 2, y: 50 });
+  Body.setPosition(shape, { x: gameWidth / 2, y: 100 });
   Body.setAngle(shape, Math.random() * Math.PI);
 
   World.add(world, [shape]);
@@ -66,16 +66,16 @@ function dropShape() {
 // 키보드 이벤트 리스너 수정
 document.addEventListener('keydown', (event) => {
   switch (event.code) {
-    case 'KeyA':
+    case 'KeyQ':
       Body.rotate(currentShapeBody, -0.1);
       break;
-    case 'KeyD':
+    case 'KeyE':
       Body.rotate(currentShapeBody, 0.1);
       break;
-    case 'ArrowLeft':
+    case 'KeyA':
       Body.translate(currentShapeBody, { x: -10, y: 0 });
       break;
-    case 'ArrowRight':
+    case 'KeyD':
       Body.translate(currentShapeBody, { x: 10, y: 0 });
       break;
     case 'Space':
