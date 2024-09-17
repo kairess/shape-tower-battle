@@ -1,8 +1,8 @@
 import { Engine, Render, World, Bodies, Body, Runner, Composite } from "matter-js";
 import { shapes } from './shapes.js';
 
-const gameWidth = 800;
-const gameHeight = 700;
+const gameWidth = 1000;
+const gameHeight = 800;
 
 const engine = Engine.create();
 const world = engine.world;
@@ -36,7 +36,9 @@ let isGameOver = false;
 
 function createShape() {
   const shapeName = Object.keys(shapes)[Math.floor(Math.random() * Object.keys(shapes).length)];
-  const shape = shapes[shapeName](0, 0, 50);
+  console.log(shapeName);
+  const size = Math.floor(Math.random() * 50) + 50;
+  const shape = shapes[shapeName](0, 0, size);
 
   Body.setStatic(shape, true);
   Body.setPosition(shape, { x: gameWidth / 2, y: 50 });
@@ -88,7 +90,7 @@ function checkGameOver() {
     const body = bodies[i];
     if (body !== ground && body.position.y > gameHeight + 100) {
       isGameOver = true;
-      // return alert('YOU DIED');
+      return alert('YOU DIED');
     }
   }
 }

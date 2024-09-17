@@ -1,8 +1,8 @@
 import { Bodies, Body, Vertices } from 'matter-js';
 
 const commonOptions = {
-  friction: 1,
-  frictionStatic: 10,
+  friction: 10,
+  frictionStatic: 100,
   restitution: 0,
 };
 
@@ -47,24 +47,6 @@ function createHexagon(x, y, size) {
   });
 }
 
-// 반원 생성 함수
-function createSemiCircle(x, y, radius) {
-  const semiCircle = Bodies.circle(x, y, radius, {
-    ...commonOptions,
-    render: {
-      fillStyle: 'green'
-    }
-  }, 64);
-  
-  Body.setVertices(semiCircle, Vertices.create([
-    { x: -radius, y: 0 },
-    ...semiCircle.vertices.filter(v => v.y <= 0),
-    { x: radius, y: 0 }
-  ], semiCircle.position));
-  
-  return semiCircle;
-}
-
 // 십자가 생성 함수
 function createCross(x, y, size) {
   const thickness = size / 3;
@@ -82,19 +64,27 @@ function createCross(x, y, size) {
 
 // 하트 모양 생성 함수
 function createHeart(x, y, size) {
-  const heartShape = Vertices.fromPath(`
-    ${size * 0} ${size * -0.5}
-    ${size * 0.5} ${size * -0.25}
-    ${size * 0.25} ${size * 0.25}
-    ${size * 0} ${size * 0.5}
-    ${size * -0.25} ${size * 0.25}
-    ${size * -0.5} ${size * -0.25}
-  `);
+  const heartVertices = [
+    { x: size * 0.5, y: size * 0.2 },
+    { x: size * 0.35, y: size * 0.05 },
+    { x: size * 0.2, y: size * 0.05 },
+    { x: size * 0.05, y: size * 0.3 },
+    { x: size * 0.05, y: size * 0.5 },
+    { x: size * 0.2, y: size * 0.75 },
+    { x: size * 0.3, y: size * 0.9 },
+    { x: size * 0.5, y: size * 1.2 },
+    { x: size * 0.7, y: size * 0.9 },
+    { x: size * 0.8, y: size * 0.75 },
+    { x: size * 0.95, y: size * 0.5 },
+    { x: size * 0.95, y: size * 0.3 },
+    { x: size * 0.8, y: size * 0.05 },
+    { x: size * 0.65, y: size * 0.05 },
+  ];
   
-  return Bodies.fromVertices(x, y, heartShape, {
+  return Bodies.fromVertices(x, y, [heartVertices], {
     ...commonOptions,
     render: {
-      fillStyle: 'pink'
+      fillStyle: 'red'
     }
   });
 }
@@ -103,7 +93,6 @@ const shapes = {
   'star': createStar,
   'triangle': createTriangle,
   'hexagon': createHexagon,
-  'semiCircle': createSemiCircle,
   'cross': createCross,
   'heart': createHeart,
 };
