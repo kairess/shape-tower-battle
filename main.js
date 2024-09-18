@@ -15,7 +15,7 @@ const render = Render.create({
     height: gameHeight,
     background: '#87CEEB',
     wireframes: false,
-    showCollisions: true,
+    // showCollisions: true,
   }
 });
 
